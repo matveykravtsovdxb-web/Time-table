@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My School Timetable</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #0b1020;
+    color: white;
+    min-height: 100vh;
+}
+
+header {
+    padding: 25px;
+    background: linear-gradient(135deg, #111a35, #172554);
+    border-bottom: 1px solid #334155;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 30px;
+}
+
+header p {
+    margin: 7px 0 0;
+    color: #94a3b8;
+}
+
+.container {
+    max-width: 1500px;
+    margin: auto;
+    padding: 20px;
+}
+
+.toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+button {
+    border: 0;
+    border-radius: 10px;
+    padding: 11px 16px;
+    background: #2563eb;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: .2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.15);
+}
+
+button.secondary {
+    background: #334155;
+}
+
+button.danger {
+    background: #dc2626;
+}
+
+button.green {
+    background: #16a34a;
+}
+
+.day-buttons {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin-bottom: 18px;
+}
+
+.day-button {
+    min-width: 110px;
+    background: #1e293b;
+}
+
+.day-button.active {
+    background: #2563eb;
+}
+
+.timetable-wrapper {
+    overflow-x: auto;
+    background: #111827;
+    border-radius: 18px;
+    border: 1px solid #334155;
+    box-shadow: 0 20px 60px rgba(0,0,0,.3);
+}
+
+.timetable {
+    min-width: 1050px;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.timetable th,
+.timetable td {
+    border: 1px solid #334155;
+    text-align: center;
+}
+
+.timetable th {
+    background: #172554;
+    padding: 16px;
+    font-size: 17px;
+}
+
+.time-column {
+    width: 130px;
+    background: #0f172a;
+    color: #94a3b8;
+    font-weight: bold;
+}
+
+.time-cell {
+    padding: 8px;
+    font-size: 12px;
+}
+
+.lesson {
+    min-height: 115px;
+    padding: 12px;
+    cursor: pointer;
+    position: relative;
+    transition: .2s;
+}
+
+.lesson:hover {
+    filter: brightness(1.18);
+    transform: scale(.98);
+}
+
+.subject {
+    font-size: 17px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.teacher {
+    font-size: 13px;
+    color: #e2e8f0;
+}
+
+.room {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #cbd5e1;
+}
+
+.empty {
+    color: #475569;
+    min-height: 115px;
+    padding: 35px 10px;
+}
+
+.lunch {
+    background: linear-gradient(135deg,#854d0e,#a16207) !important;
+}
+
+.info {
+    margin-top: 18px;
+    padding: 16px;
+    background: #111827;
+    border: 1px solid #334155;
+    border-radius: 14px;
+    color: #94a3b8;
+}
+
+.mobile-day {
+    display: none;
+}
+
+.modal-background {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.75);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal {
+    width: 100%;
+    max-width: 500px;
+    background: #111827;
+    border: 1px solid #334155;
+    border-radius: 18px;
+    padding: 25px;
+    box-shadow: 0 30px 100px rgba(0,0,0,.6);
+}
+
+.modal h2 {
+    margin-top: 0;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+label {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 11px;
+    border-radius: 9px;
+    border: 1px solid #475569;
+    background: #0f172a;
+    color: white;
+    outline: none;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-buttons div {
+    display: flex;
+    gap: 8px;
+}
+
+.legend {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+}
+
+@media(max-width: 800px) {
+    header h1 {
+        font-size: 24px;
+    }
+
+    .timetable-wrapper {
+        display: none;
+    }
+
+    .mobile-day {
+        display: block;
+    }
+
+    .mobile-card {
+        background: #111827;
+        border: 1px solid #334155;
+        border-left: 6px solid #2563eb;
+        border-radius: 14px;
+        margin-bottom: 12px;
+        padding: 15px;
+        cursor: pointer;
+    }
+
+    .mobile-card .mobile-time {
+        color: #60a5fa;
+        font-weight: bold;
+        font-size: 13px;
+    }
+
+    .mobile-card h3 {
+        margin: 8px 0;
+    }
+
+    .mobile-card p {
+        margin: 4px 0;
+        color: #94a3b8;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full {
+        grid-column: auto;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>📚 My School Timetable</h1>
+    <p>08G • School Timetable • 01/09/2026</p>
+</header>
+
+<div class="container">
+
+    <div class="toolbar">
+        <button onclick="showAllDays()">📅 Full Week</button>
+        <button class="secondary" onclick="toggleMobileDay()">📱 Day View</button>
+        <button class="green" onclick="addLesson()">＋ Add Lesson</button>
+        <button class="secondary" onclick="swapMode()">🔄 Swap Lessons</button>
+        <button class="secondary" onclick="resetTimetable()">↩ Reset Timetable</button>
+    </div>
+
+    <div class="day-buttons">
+        <button class="day-button active" onclick="selectDay('Monday', this)">Monday</button>
+        <button class="day-button" onclick="selectDay('Tuesday', this)">Tuesday</button>
+        <button class="day-button" onclick="selectDay('Wednesday', this)">Wednesday</button>
+        <button class="day-button" onclick="selectDay('Thursday', this)">Thursday</button>
+        <button class="day-button" onclick="selectDay('Friday', this)">Friday</button>
+    </div>
+
+    <div class="timetable-wrapper">
+        <table class="timetable">
+            <thead>
+                <tr>
+                    <th class="time-column">Time</th>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Friday</th>
+                </tr>
+            </thead>
+
+            <tbody id="timetableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="mobile-day" id="mobileDay"></div>
+
+    <div class="info">
+        <strong>💡 How to use it</strong><br><br>
+        Click any lesson to edit it. You can change the subject, teacher,
+        room, time, colour and notes. Use <b>Swap Lessons</b> to swap two
+        classes. Everything is automatically saved in your browser.
+    </div>
+
+    <div class="legend">
+        <span><i class="dot" style="background:#2563eb"></i> Science</span>
+        <span><i class="dot" style="background:#9333ea"></i> Maths</span>
+        <span><i class="dot" style="background:#16a34a"></i> Languages</span>
+        <span><i class="dot" style="background:#ea580c"></i> Humanities</span>
+        <span><i class="dot" style="background:#0891b2"></i> Technology</span>
+        <span><i class="dot" style="background:#ca8a04"></i> Lunch</span>
+    </div>
+
+</div>
+
+
+<!-- EDIT MODAL -->
+
+<div class="modal-background" id="modalBackground">
+
+    <div class="modal">
+
+        <h2 id="modalTitle">Edit Lesson</h2>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label>Day</label>
+                <select id="lessonDay">
+                    <option>Monday</option>
+                    <option>Tuesday</option>
+                    <option>Wednesday</option>
+                    <option>Thursday</option>
+                    <option>Friday</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Subject</label>
+                <input id="lessonSubject" type="text">
+            </div>
+
+            <div class="form-group">
+                <label>Start Time</label>
+                <input id="lessonStart" type="time">
+            </div>
+
+            <div class="form-group">
+                <label>End Time</label>
+                <input id="lessonEnd" type="time">
+            </div>
+
+            <div class="form-group">
+                <label>Teacher</label>
+                <input id="lessonTeacher" type="text">
+            </div>
+
+            <div class="form-group">
+                <label>Room</label>
+                <input id="lessonRoom" type="text">
+            </div>
+
+            <div class="form-group full">
+                <label>Colour</label>
+                <input id="lessonColor" type="color" value="#2563eb">
+            </div>
+
+            <div class="form-group full">
+                <label>Lesson Notes</label>
+                <textarea id="lessonNotes" rows="4"
+                    placeholder="Homework, reminders, things to remember..."></textarea>
+            </div>
+
+        </div>
+
+        <div class="modal-buttons">
+
+            <button class="danger" onclick="deleteLesson()">
+                Delete
+            </button>
+
+            <div>
+                <button class="secondary" onclick="closeModal()">
+                    Cancel
+                </button>
+
+                <button onclick="saveLesson()">
+                    Save
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+
+/* =========================================================
+   YOUR TIMETABLE
+========================================================= */
+
+const originalTimetable = [
+
+/* MONDAY */
+
+{day:"Monday",start:"07:50",end:"08:45",subject:"Science",teacher:"Mr E Nasir",room:"3024",color:"#2563eb"},
+{day:"Monday",start:"08:45",end:"09:40",subject:"Maths",teacher:"Ms N Hanlon",room:"3076",color:"#9333ea"},
+{day:"Monday",start:"09:55",end:"10:50",subject:"Games",teacher:"Mr A James",room:"",color:"#16a34a"},
+{day:"Monday",start:"10:50",end:"11:45",subject:"Mandarin",teacher:"Ms F McCommon",room:"2042",color:"#16a34a"},
+{day:"Monday",start:"11:45",end:"12:40",subject:"Music",teacher:"Mr T Nelms",room:"1047",color:"#db2777"},
+{day:"Monday",start:"12:40",end:"13:05",subject:"Lunch",teacher:"",room:"",color:"#ca8a04",lunch:true},
+{day:"Monday",start:"13:05",end:"13:30",subject:"Lunch",teacher:"",room:"",color:"#ca8a04",lunch:true},
+{day:"Monday",start:"13:30",end:"14:25",subject:"Humanities",teacher:"Mr D McEntee",room:"4037",color:"#ea580c"},
+{day:"Monday",start:"14:25",end:"15:10",subject:"MSC",teacher:"Ms M Doyle",room:"1010",color:"#7c3aed"},
+
+/* TUESDAY */
+
+{day:"Tuesday",start:"07:50",end:"08:45",subject:"Mandarin",teacher:"Ms F McCommon",room:"2009",color:"#16a34a"},
+{day:"Tuesday",start:"08:45",end:"09:40",subject:"English",teacher:"Ms C Perry",room:"2037",color:"#0891b2"},
+{day:"Tuesday",start:"09:55",end:"10:50",subject:"History",teacher:"Ms J Jahan",room:"4038",color:"#ea580c"},
+{day:"Tuesday",start:"10:50",end:"11:45",subject:"Maths",teacher:"Ms N Solani",room:"3051",color:"#9333ea"},
+{day:"Tuesday",start:"11:45",end:"12:40",subject:"Arabic for Non Arabs",teacher:"Mr T Rafeek",room:"2030",color:"#16a34a"},
+{day:"Tuesday",start:"12:40",end:"13:05",subject:"Lunch",teacher:"",room:"",color:"#ca8a04",lunch:true},
+{day:"Tuesday",start:"13:05",end:"13:30",subject:"Lunch",teacher:"",room:"",color:"#ca8a04",lunch:true},
+{day:"Tuesday",start:"13:30",end:"14:25",subject:"Science",teacher:"Mr E Nasir",room:"3024",color:"#2563eb"},
+{day:"Tuesday",start:"14:25",end:"15:10",subject:"Pos Education",teacher:"Ms M Doyle",room:"1010",color:"#7c3aed"},
+
+/* WEDNESDAY */
+
+{day:"Wednesday",start:"07:50",end:"08:45",subject:"English",teacher:"Ms G Moores",room:"2010",color:"#0891b2"},
+{day:"Wednesday",start:"08:45",end:"09:40",subject:"Games",teacher:"Mr G Matthews",room:"B061",color:"#16a34a"},
+{day:"Wednesday",start:"09:55",end:"10:50",subject:"Geography",teacher:"Mr D McEntee",room:"4037",color:"#ea580c"},
+{day:"Wednesday",start:"10:50",end:"11:45",subject:"Music",teacher:"Mr T Nelms",room:"1047",color:"#db2777"},
+{day:"Wednesday",start:"11:45",end:"12:40",subject:"DT Product Design",teacher:"Mr J McNulty",room:"3008",color:"#0891b2"},
+{day:"Wednesday",start:"12:40",end:"13:05",subject:"Lunch",teacher:"",room:"",color:"#ca8a04",lunch:true},
+{day:"Wednesday",start:"13:05",end:"13:30",subject:"Lunch",teacher:"",room:"",color:"#ca8a04",lunch:true},
+{day:"Wednesday",start:"13:30",end:"14:25",subject:"Arabic for Non Arabs",teacher:"Mr T Rafeek",room:"2030",color:"#16a34a"},
+{day:"Wednesday",start:"14:25",end:"15:10",subject:"Electives",teacher:"",room:"",color:"#7c3aed"},
+
+/* THURSDAY */
+
+{day:"Thursday",start:"07:50",end:"08:45",subject:"English",teacher:"Ms G Moores",room:"2010",color:"#0891b2"},
+{day:"Thursday",start:"08:45",end:"09:40",subject:"Maths",teacher:"Ms N Solani",room:"3051",color:"#9333ea"},
+{day:"Thursday",start:"09:55",end:"10:50",subject:"DT Product Design",teacher:"Mr J McNulty",room:"3008",color:"#0891b2"},
+{day:"Thursday",start:"10:50",end:"11:45",subject:"Mandarin",teacher:"Ms F McCommon",room:"2042",color:"#16a34a"},
+{day:"Thursday",start:"11:45",end:"12:40",subject:"Science",teacher:"Ms V Crowther",room:"3021",color:"#2563eb"},
+{day:"Thursday",start:"12:40",end:"13:05",subject:"Lunch",teacher:"",room:"",color:"#ca8a04",lunch:true},
+{day:"Thursday",start:"13:05",end:"13:30",subject:"Lunch",teacher:"",room:"",color:"#ca8a04",lunch:true},
+{day:"Thursday",start:"13:30",end:"14:25",subject:"English",teacher:"Ms G Moores",room:"2010",color:"#0891b2"},
+{day:"Thursday",start:"14:25",end:"15:10",subject:"Life Skills",teacher:"Ms M Doyle",room:"1010",color:"#7c3aed"},
+
+/* FRIDAY */
+
+{day:"Friday",start:"07:50",end:"08:45",subject:"Computer Science",teacher:"Mr T Aslam",room:"2008",color:"#0891b2"},
+{day:"Friday",start:"08:45",end:"09:40",subject:"Science",teacher:"Ms V Crowther",room:"3021",color:"#2563eb"},
+{day:"Friday",start:"09:55",end:"10:50",subject:"Arabic for Non Arabs",teacher:"Mr T Rafeek",room:"2030",color:"#16a34a"},
+{day:"Friday",start:"10:50",end:"11:45",subject:"Maths",teacher:"Ms N Solani",room:"3051",color:"#9333ea"}
+
+];
+
+let timetable = JSON.parse(localStorage.getItem("schoolTimetable"));
+
+if (!timetable || timetable.length === 0) {
+    timetable = JSON.parse(JSON.stringify(originalTimetable));
+}
+
+let editingIndex = null;
+let swapEnabled = false;
+let swapFirst = null;
+let currentDay = "Monday";
+
+
+/* =========================================================
+   TIME ROWS
+========================================================= */
+
+const times = [
+    ["07:50","08:45"],
+    ["08:45","09:40"],
+    ["09:55","10:50"],
+    ["10:50","11:45"],
+    ["11:45","12:40"],
+    ["12:40","13:05"],
+    ["13:05","13:30"],
+    ["13:30","14:25"],
+    ["14:25","15:10"]
+];
+
+const days = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday"
+];
+
+
+/* =========================================================
+   SAVE
+========================================================= */
+
+function saveData() {
+    localStorage.setItem(
+        "schoolTimetable",
+        JSON.stringify(timetable)
+    );
+}
+
+
+/* =========================================================
+   FIND LESSON
+========================================================= */
+
+function findLesson(day, start) {
+
+    return timetable.findIndex(
+        lesson =>
+        lesson.day === day &&
+        lesson.start === start
+    );
+
+}
+
+
+/* =========================================================
+   DISPLAY FULL TIMETABLE
+========================================================= */
+
+function renderTimetable() {
+
+    const body = document.getElementById("timetableBody");
+
+    body.innerHTML = "";
+
+    times.forEach(time => {
+
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td class="time-column">
+                <div class="time-cell">
+                    ${time[0]}<br>
+                    ↓<br>
+                    ${time[1]}
+                </div>
+            </td>
+        `;
+
+        days.forEach(day => {
+
+            const index = findLesson(day,time[0]);
+
+            const cell = document.createElement("td");
+
+            if (index === -1) {
+
+                cell.innerHTML = `
+                    <div class="empty"
+                         onclick="addLessonAt('${day}','${time[0]}','${time[1]}')">
+                        +
+                    </div>
+                `;
+
+            } else {
+
+                const lesson = timetable[index];
+
+                cell.innerHTML = `
+                    <div
+                        class="lesson ${lesson.lunch ? "lunch" : ""}"
+                        style="background:${lesson.color}"
+                        onclick="lessonClicked(${index})"
+                    >
+                        <div class="subject">
+                            ${lesson.subject}
+                        </div>
+
+                        ${
+                            lesson.teacher
+                            ? `<div class="teacher">${lesson.teacher}</div>`
+                            : ""
+                        }
+
+                        ${
+                            lesson.room
+                            ? `<div class="room">Room ${lesson.room}</div>`
+                            : ""
+                        }
+
+                    </div>
+                `;
+            }
+
+            row.appendChild(cell);
+
+        });
+
+        body.appendChild(row);
+
+    });
+
+}
+
+
+/* =========================================================
+   MOBILE VIEW
+========================================================= */
+
+function renderMobileDay() {
+
+    const container = document.getElementById("mobileDay");
+
+    container.innerHTML = `
+        <h2>${currentDay}</h2>
+    `;
+
+    const lessons = timetable
+        .filter(x => x.day === currentDay)
+        .sort((a,b) => a.start.localeCompare(b.start));
+
+    if (lessons.length === 0) {
+
+        container.innerHTML += `
+            <div class="info">
+                No lessons scheduled.
+            </div>
+        `;
+
+        return;
+    }
+
+    lessons.forEach(lesson => {
+
+        const index = timetable.indexOf(lesson);
+
+        const card = document.createElement("div");
+
+        card.className = "mobile-card";
+
+        card.style.borderLeftColor = lesson.color;
+
+        card.onclick = () => lessonClicked(index);
+
+        card.innerHTML = `
+            <div class="mobile-time">
+                ${lesson.start} – ${lesson.end}
+            </div>
+
+            <h3>${lesson.subject}</h3>
+
+            ${
+                lesson.teacher
+                ? `<p>👨‍🏫 ${lesson.teacher}</p>`
+                : ""
+            }
+
+            ${
+                lesson.room
+                ? `<p>📍 Room ${lesson.room}</p>`
+                : ""
+            }
+        `;
+
+        container.appendChild(card);
+
+    });
+
+}
+
+
+/* =========================================================
+   SELECT DAY
+========================================================= */
+
+function selectDay(day, button) {
+
+    currentDay = day;
+
+    document
+        .querySelectorAll(".day-button")
+        .forEach(btn => btn.classList.remove("active"));
+
+    button.classList.add("active");
+
+    renderMobileDay();
+
+}
+
+
+/* =========================================================
+   FULL WEEK
+========================================================= */
+
+function showAllDays() {
+
+    document
+        .querySelectorAll(".day-button")
+        .forEach(btn => btn.classList.remove("active"));
+
+    renderTimetable();
+
+}
+
+
+/* =========================================================
+   OPEN LESSON
+========================================================= */
+
+function lessonClicked(index) {
+
+    if (swapEnabled) {
+
+        if (swapFirst === null) {
+
+            swapFirst = index;
+
+            alert(
+                "First lesson selected.\n\n" +
+                "Now click another lesson to swap them."
+            );
+
+        } else {
+
+            swapLessons(swapFirst,index);
+
+            swapFirst = null;
+
+        }
+
+        return;
+    }
+
+    openEdit(index);
+
+}
+
+
+/* =========================================================
+   EDIT LESSON
+========================================================= */
+
+function openEdit(index) {
+
+    editingIndex = index;
+
+    const lesson = timetable[index];
+
+    document.getElementById("modalTitle").innerText =
+        "Edit " + lesson.subject;
+
+    document.getElementById("lessonDay").value =
+        lesson.day;
+
+    document.getElementById("lessonSubject").value =
+        lesson.subject;
+
+    document.getElementById("lessonStart").value =
+        lesson.start;
+
+    document.getElementById("lessonEnd").value =
+        lesson.end;
+
+    document.getElementById("lessonTeacher").value =
+        lesson.teacher || "";
+
+    document.getElementById("lessonRoom").value =
+        lesson.room || "";
+
+    document.getElementById("lessonColor").value =
+        lesson.color || "#2563eb";
+
+    document.getElementById("lessonNotes").value =
+        lesson.notes || "";
+
+    document.getElementById("modalBackground").style.display =
+        "flex";
+
+}
+
+
+/* =========================================================
+   ADD LESSON
+========================================================= */
+
+function addLesson() {
+
+    editingIndex = null;
+
+    document.getElementById("modalTitle").innerText =
+        "Add Lesson";
+
+    document.getElementById("lessonDay").value =
+        currentDay;
+
+    document.getElementById("lessonSubject").value = "";
+
+    document.getElementById("lessonStart").value =
+        "07:50";
+
+    document.getElementById("lessonEnd").value =
+        "08:45";
+
+    document.getElementById("lessonTeacher").value = "";
+
+    document.getElementById("lessonRoom").value = "";
+
+    document.getElementById("lessonColor").value =
+        "#2563eb";
+
+    document.getElementById("lessonNotes").value = "";
+
+    document.getElementById("modalBackground").style.display =
+        "flex";
+
+}
+
+
+function addLessonAt(day,start,end) {
+
+    addLesson();
+
+    document.getElementById("lessonDay").value = day;
+    document.getElementById("lessonStart").value = start;
+    document.getElementById("lessonEnd").value = end;
+
+}
+
+
+/* =========================================================
+   SAVE LESSON
+========================================================= */
+
+function saveLesson() {
+
+    const lesson = {
+
+        day: document.getElementById("lessonDay").value,
+
+        start: document.getElementById("lessonStart").value,
+
+        end: document.getElementById("lessonEnd").value,
+
+        subject:
+            document.getElementById("lessonSubject").value
+            || "Untitled Lesson",
+
+        teacher:
+            document.getElementById("lessonTeacher").value,
+
+        room:
+            document.getElementById("lessonRoom").value,
+
+        color:
+            document.getElementById("lessonColor").value,
+
+        notes:
+            document.getElementById("lessonNotes").value
+
+    };
+
+    if (editingIndex === null) {
+
+        timetable.push(lesson);
+
+    } else {
+
+        timetable[editingIndex] = lesson;
+
+    }
+
+    saveData();
+
+    closeModal();
+
+    renderTimetable();
+
+    renderMobileDay();
+
+}
+
+
+/* =========================================================
+   DELETE LESSON
+========================================================= */
+
+function deleteLesson() {
+
+    if (editingIndex === null) return;
+
+    if (!confirm("Delete this lesson?")) return;
+
+    timetable.splice(editingIndex,1);
+
+    saveData();
+
+    closeModal();
+
+    renderTimetable();
+
+    renderMobileDay();
+
+}
+
+
+/* =========================================================
+   CLOSE MODAL
+========================================================= */
+
+function closeModal() {
+
+    document.getElementById("modalBackground").style.display =
+        "none";
+
+    editingIndex = null;
+
+}
+
+
+/* =========================================================
+   SWAP LESSONS
+========================================================= */
+
+function swapMode() {
+
+    swapEnabled = !swapEnabled;
+
+    swapFirst = null;
+
+    if (swapEnabled) {
+
+        alert(
+            "SWAP MODE ON\n\n" +
+            "Click the first lesson, then click the second lesson."
+        );
+
+    } else {
+
+        alert("Swap mode turned off.");
+
+    }
+
+}
+
+
+function swapLessons(a,b) {
+
+    const first = timetable[a];
+    const second = timetable[b];
+
+    const firstDay = first.day;
+    const firstStart = first.start;
+    const firstEnd = first.end;
+
+    first.day = second.day;
+    first.start = second.start;
+    first.end = second.end;
+
+    second.day = firstDay;
+    second.start = firstStart;
+    second.end = firstEnd;
+
+    saveData();
+
+    renderTimetable();
+
+    renderMobileDay();
+
+    alert("Lessons swapped!");
+
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+function resetTimetable() {
+
+    if (
+        !confirm(
+            "Reset the timetable to the timetable from your photo?"
+        )
+    ) return;
+
+    timetable =
+        JSON.parse(JSON.stringify(originalTimetable));
+
+    saveData();
+
+    renderTimetable();
+
+    renderMobileDay();
+
+}
+
+
+/* =========================================================
+   MOBILE TOGGLE
+========================================================= */
+
+function toggleMobileDay() {
+
+    const mobile = document.getElementById("mobileDay");
+
+    if (mobile.style.display === "block") {
+
+        mobile.style.display = "none";
+
+    } else {
+
+        mobile.style.display = "block";
+
+        renderMobileDay();
+
+    }
+
+}
+
+
+/* =========================================================
+   KEYBOARD SHORTCUTS
+========================================================= */
+
+document.addEventListener("keydown", function(e) {
+
+    if (e.key === "Escape") {
+        closeModal();
+    }
+
+    if (e.key.toLowerCase() === "n" &&
+        document.getElementById("modalBackground").style.display !== "flex") {
+
+        addLesson();
+
+    }
+
+});
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+renderTimetable();
+renderMobileDay();
+
+</script>
+
+</body>
+</html>
